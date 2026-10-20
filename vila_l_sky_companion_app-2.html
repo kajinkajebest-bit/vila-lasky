@@ -1,0 +1,1474 @@
+<!DOCTYPE html>
+<html lang="cs" class="h-full bg-amber-50 text-slate-800 select-none">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Vila Lásky - Oficiální Aplikace Pro Diváky</title>
+
+    <!-- PWA / Web App Manifest pro instalaci na plochu -->
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#ff007a">
+    <link rel="manifest" id="manifestPlaceholder">
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=Playfair+Display:ital,wght@0,700;1,700&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'villa-pink': '#ff007a',
+                        'villa-pink-soft': '#fff0f6',
+                        'villa-magenta': '#e0006c',
+                        'villa-orange': '#ff7a00',
+                        'villa-yellow': '#ffc700',
+                        'villa-teal': '#00c4cc',
+                        'villa-cream': '#faf8f5',
+                        'villa-card': '#ffffff',
+                        'villa-border': '#f1e6df'
+                    },
+                    fontFamily: {
+                        'sans': ['Plus Jakarta Sans', 'sans-serif'],
+                        'serif': ['Playfair Display', 'serif']
+                    },
+                    boxShadow: {
+                        'soft': '0 8px 30px rgba(255, 0, 122, 0.08)',
+                        'card': '0 4px 20px rgba(0, 0, 0, 0.04)',
+                        'pink-glow': '0 6px 20px rgba(255, 0, 122, 0.25)'
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #fcf8f5;
+            background-image: radial-gradient(#ff007a 0.5px, transparent 0.5px), radial-gradient(#00c4cc 0.5px, #fcf8f5 0.5px);
+            background-size: 20px 20px;
+            background-position: 0 0, 10px 10px;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .villa-card-style {
+            background: #ffffff;
+            border: 1px solid #f1e2da;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+        }
+
+        .villa-gradient-text {
+            background: linear-gradient(135deg, #ff007a 0%, #ff7a00 50%, #00c4cc 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        ::-webkit-scrollbar {
+            width: 4px;
+            height: 4px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1e2da;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #ff007a;
+            border-radius: 4px;
+        }
+
+        @keyframes floatUp {
+            0% { transform: translateY(0) scale(0.8); opacity: 1; }
+            100% { transform: translateY(-100px) scale(1.3); opacity: 0; }
+        }
+
+        .animate-float-heart {
+            animation: floatUp 1.5s ease-out forwards;
+        }
+
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between max-w-md mx-auto relative border-x border-slate-200/80 shadow-xl bg-white">
+
+    <!-- Animovaná srdíčka -->
+    <div id="heartAnimationContainer" class="fixed inset-0 pointer-events-none z-50 overflow-hidden"></div>
+
+    <!-- HORNÍ HEADER -->
+    <header class="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-pink-100 px-4 py-3 flex items-center justify-between shadow-sm">
+        <div class="flex items-center space-x-2.5">
+            <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-villa-pink via-villa-orange to-villa-yellow flex items-center justify-center shadow-pink-glow text-white text-lg cursor-pointer" onclick="openModal('userProfileModal')">
+                <i class="fa-solid fa-heart"></i>
+            </div>
+            <div>
+                <h1 class="font-black text-2xl tracking-tight villa-gradient-text italic font-serif leading-none">
+                    Vila Lásky
+                </h1>
+                <span class="text-[9px] font-extrabold uppercase tracking-widest text-villa-teal block mt-0.5">
+                    OFICIÁLNÍ DIVÁCKÁ APLIKACE
+                </span>
+            </div>
+        </div>
+
+        <!-- Mute, Install & User Profil -->
+        <div class="flex items-center space-x-2">
+            <!-- PWA Tlačítko Instalovat -->
+            <button id="pwaInstallBtn" onclick="installPWAApp()" class="hidden px-2.5 py-1.5 bg-gradient-to-r from-villa-pink to-villa-orange text-white text-[10px] font-black uppercase tracking-wider rounded-full shadow-pink-glow flex items-center gap-1 animate-pulse">
+                <i class="fa-solid fa-download"></i> Stáhnout
+            </button>
+
+            <!-- Profil / Přihlášení -->
+            <button onclick="openModal('userProfileModal')" id="userAvatarBtn" class="w-8 h-8 rounded-full bg-pink-100 border border-pink-300 text-villa-pink flex items-center justify-center text-xs font-bold overflow-hidden shadow-sm" title="Můj Profil / Přihlášení">
+                <i class="fa-solid fa-user"></i>
+            </button>
+
+            <button onclick="toggleAudioMute()" id="audioToggleBtn" class="p-2 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-full text-xs transition" title="Zvuk ZAP/VYP">
+                <i class="fa-solid fa-volume-high"></i>
+            </button>
+            <div class="flex items-center bg-pink-50 border border-pink-200 rounded-full p-1 pl-2.5">
+                <span class="text-[10px] font-black uppercase tracking-tight text-villa-pink mr-1.5 flex items-center gap-1">
+                    <i class="fa-solid fa-crown text-villa-yellow"></i> Režie
+                </span>
+                <label class="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox" id="adminToggle" onchange="handleAdminToggle(this.checked)" class="sr-only peer">
+                    <div class="w-8 h-4 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-3 after:w-3 after:transition-all peer-checked:bg-gradient-to-r peer-checked:from-villa-pink peer-checked:to-villa-teal"></div>
+                </label>
+            </div>
+        </div>
+    </header>
+
+    <!-- BANNER PWA PRO INSTALACI NA DOMOVSKOU OBRAZOVKU -->
+    <div id="pwaBanner" class="bg-gradient-to-r from-villa-teal via-teal-600 to-emerald-500 text-white p-3 flex items-center justify-between text-xs shadow-md">
+        <div class="flex items-center gap-2">
+            <div class="w-8 h-8 rounded-xl bg-white/20 flex items-center justify-center text-sm font-black">📱</div>
+            <div>
+                <p class="font-extrabold leading-tight">Přidej si aplikaci na plochu!</p>
+                <p class="text-[10px] text-teal-100">Otevírej přímo z mobilu bez prohlížeče.</p>
+            </div>
+        </div>
+        <button onclick="installPWAApp()" class="px-3 py-1.5 bg-white text-teal-700 rounded-full font-black text-[10px] uppercase shadow-sm">
+            Instalovat
+        </button>
+    </div>
+
+    <!-- ADMIN STRIP BANNER -->
+    <div id="adminModeBanner" class="hidden bg-gradient-to-r from-villa-pink via-villa-magenta to-villa-orange text-white px-4 py-2 flex items-center justify-between text-xs font-bold border-b border-pink-300 shadow-sm">
+        <span class="flex items-center gap-1.5 text-[11px]">
+            <i class="fa-solid fa-sliders text-villa-yellow"></i> MÓD REŽIE (ADMIN)
+        </span>
+        <button onclick="triggerTextAlert('MÁM ZPRÁVU: Všechna srdíčka se okamžitě shromáždí u ohniště!')" class="bg-white/20 hover:bg-white/30 text-white px-2.5 py-1 rounded-full text-[10px] uppercase font-black tracking-wider border border-white/40">
+            <i class="fa-solid fa-bullhorn mr-1"></i> Poslat Zprávu
+        </button>
+    </div>
+
+    <!-- HLAVNÍ OBSAH APLIKACE -->
+    <main class="flex-grow p-4 space-y-6 overflow-y-auto pb-24">
+
+        <!-- ================= 1. TAB: NOVINKY & ČLÁNKY ================= -->
+        <section id="page-news" class="page-content space-y-5">
+            
+            <!-- PŘEHLED VŠECH SRDÍČEK NA HLAVNÍ STRÁNCE (HORIZONTÁLNÍ ROSTER) -->
+            <div class="space-y-2">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-xs font-black uppercase tracking-wider text-slate-800 flex items-center gap-1.5">
+                        <i class="fa-solid fa-heart text-villa-pink"></i> Přehled Srdíček
+                    </h2>
+                    <button onclick="switchTab('islanders')" class="text-[10px] font-extrabold text-villa-teal uppercase tracking-wider">
+                        Zobrazit Vše &rarr;
+                    </button>
+                </div>
+
+                <div id="homeIslandersRow" class="flex gap-3 overflow-x-auto no-scrollbar py-1 text-center">
+                    <!-- Dynamicky generovaný horizontální přehled VŠECH srdíček -->
+                </div>
+            </div>
+
+            <!-- Banner / Uvítání -->
+            <div class="bg-gradient-to-r from-pink-500 via-rose-500 to-orange-400 p-4 rounded-3xl text-white shadow-pink-glow relative overflow-hidden">
+                <div class="relative z-10 space-y-1">
+                    <span class="text-[9px] font-black uppercase tracking-widest bg-white/20 px-2.5 py-0.5 rounded-full backdrop-blur-sm">Dnes na Vile</span>
+                    <h2 class="text-base font-black leading-tight">Sleduj exkluzivní články a dění z vily bez cenzury!</h2>
+                    <p class="text-[11px] text-pink-100">Novinky ze zákulisí, rozhovory a příběhy přímo z ostrova.</p>
+                </div>
+                <div class="absolute -right-4 -bottom-6 text-white/10 text-8xl font-black italic">VILA</div>
+            </div>
+
+            <!-- Seznam článků -->
+            <div class="space-y-3">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-xs font-black uppercase tracking-wider text-slate-700 flex items-center gap-1.5">
+                        <i class="fa-solid fa-newspaper text-villa-pink"></i> Nejnovější Články
+                    </h2>
+                    <span class="text-[10px] font-bold text-slate-400" id="articleCountLabel">0 článků</span>
+                </div>
+
+                <div id="articlesList" class="space-y-4">
+                    <!-- Načteno dynamicky z newsFeed array -->
+                </div>
+            </div>
+
+            <!-- Rychlé Hlasování Preview -->
+            <div id="homeActivePollPreview" class="space-y-2">
+                <!-- Dynamický náhled aktivního hlasování -->
+            </div>
+        </section>
+
+        <!-- ================= 2. TAB: HLASOVÁNÍ ================= -->
+        <section id="page-polls" class="page-content hidden space-y-5">
+            <div>
+                <h2 class="text-base font-black uppercase text-slate-800 tracking-wider flex items-center gap-2">
+                    <i class="fa-solid fa-check-to-slot text-villa-pink"></i> Oficiální Hlasování
+                </h2>
+                <p class="text-xs text-slate-500 mt-0.5">Hlasuj a rozhoduj o osudu srdíček. Výsledky hlasování vyhodnocuje režie!</p>
+            </div>
+
+            <div id="viewerPollsContainer" class="space-y-5">
+                <!-- Načtená hlasování -->
+            </div>
+        </section>
+
+        <!-- ================= 3. TAB: SRDÍČKA ================= -->
+        <section id="page-islanders" class="page-content hidden space-y-5">
+            <div class="space-y-3">
+                <h2 class="text-base font-black uppercase text-slate-800 tracking-wider flex items-center gap-2">
+                    <i class="fa-solid fa-heart text-villa-pink"></i> Všechna Srdíčka
+                </h2>
+                
+                <!-- Filtry -->
+                <div class="flex gap-2 overflow-x-auto pb-1 text-xs font-bold no-scrollbar">
+                    <button onclick="filterIslanders('ALL')" id="filter-ALL" class="islander-filter-btn px-3.5 py-1.5 rounded-full bg-villa-pink text-white shadow-sm">Všichni</button>
+                    <button onclick="filterIslanders('IN_VILLA')" id="filter-IN_VILLA" class="islander-filter-btn px-3.5 py-1.5 rounded-full bg-slate-100 text-slate-600">Ve Vile</button>
+                    <button onclick="filterIslanders('COUPLES')" id="filter-COUPLES" class="islander-filter-btn px-3.5 py-1.5 rounded-full bg-slate-100 text-slate-600">Páry</button>
+                    <button onclick="filterIslanders('Bombshell')" id="filter-Bombshell" class="islander-filter-btn px-3.5 py-1.5 rounded-full bg-slate-100 text-slate-600">Bombshells</button>
+                    <button onclick="filterIslanders('DUMPED')" id="filter-DUMPED" class="islander-filter-btn px-3.5 py-1.5 rounded-full bg-slate-100 text-slate-600">Vypadlí</button>
+                </div>
+            </div>
+
+            <div id="islanderRosterGrid" class="grid grid-cols-2 gap-3.5">
+                <!-- Mřížka srdíček -->
+            </div>
+        </section>
+
+        <!-- ================= 4. TAB: REŽIE / ADMIN PANEL ================= -->
+        <section id="page-admin" class="page-content hidden space-y-5">
+            <div class="bg-white p-4 rounded-3xl space-y-4 border-2 border-villa-pink/40 shadow-card">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-sm font-black uppercase text-slate-800 tracking-wider flex items-center gap-2">
+                        <i class="fa-solid fa-sliders text-villa-pink"></i> Správa Vily & Režie
+                    </h2>
+                    <span class="text-[10px] bg-pink-100 text-villa-pink font-extrabold px-2.5 py-1 rounded-full border border-pink-200">
+                        Pouze Admin
+                    </span>
+                </div>
+                <p class="text-xs text-slate-500">
+                    Máš kompletní kontrolu nad srdíčky ve vile, vytvářením anket, publikováním článků a sledováním živých výsledků.
+                </p>
+
+                <div class="grid grid-cols-2 gap-2 text-xs font-bold pt-1">
+                    <button onclick="openModal('addIslanderModal')" class="p-3 bg-gradient-to-r from-villa-pink to-villa-magenta text-white rounded-2xl flex flex-col items-center justify-center gap-1.5 shadow-pink-glow">
+                        <i class="fa-solid fa-user-plus text-base"></i> Nové Srdíčko
+                    </button>
+                    <button onclick="openModal('createPollModal')" class="p-3 bg-gradient-to-r from-villa-teal to-teal-600 text-white rounded-2xl flex flex-col items-center justify-center gap-1.5 shadow-md">
+                        <i class="fa-solid fa-square-plus text-base"></i> Nové Hlasování
+                    </button>
+                    <button onclick="openModal('addNewsModal')" class="p-3 bg-gradient-to-r from-villa-orange to-amber-500 text-white rounded-2xl flex flex-col items-center justify-center gap-1.5 shadow-md col-span-2">
+                        <i class="fa-solid fa-pen-to-square text-base"></i> Publikovat Nový Článek
+                    </button>
+                </div>
+            </div>
+
+            <!-- Poslat Custom Text Alert -->
+            <div class="villa-card-style p-4 rounded-3xl space-y-3">
+                <h3 class="text-xs font-black uppercase text-slate-800 flex items-center gap-2">
+                    <i class="fa-solid fa-comment-sms text-villa-pink"></i> Odeslat Notifikaci "MÁM ZPRÁVU!"
+                </h3>
+                <form onsubmit="handleSendCustomAlert(event)" class="space-y-2">
+                    <input type="text" id="customAlertInput" placeholder="např. Všechna srdíčka! Okamžitě se shromážděte u ohniště..." required class="w-full bg-slate-50 border border-slate-200 text-xs rounded-xl px-3 py-2.5 text-slate-800 focus:outline-none focus:border-villa-pink">
+                    <button type="submit" class="w-full py-2.5 bg-gradient-to-r from-villa-pink to-villa-orange font-extrabold text-white text-xs uppercase tracking-wider rounded-xl shadow-pink-glow">
+                        Poslat Zprávu Do Aplikace 💬
+                    </button>
+                </form>
+            </div>
+
+            <!-- Statistiky & Reset -->
+            <div class="villa-card-style p-4 rounded-3xl space-y-4">
+                <h3 class="text-xs font-black uppercase text-slate-800 flex items-center gap-2">
+                    <i class="fa-solid fa-chart-pie text-villa-teal"></i> Přehled Dat Vily
+                </h3>
+                <div class="grid grid-cols-3 gap-2 text-center">
+                    <div class="bg-slate-50 p-2.5 rounded-2xl border border-slate-100">
+                        <span class="block text-base font-black text-villa-pink" id="statIslanders">0</span>
+                        <span class="text-[9px] uppercase font-bold text-slate-400">Srdíček</span>
+                    </div>
+                    <div class="bg-slate-50 p-2.5 rounded-2xl border border-slate-100">
+                        <span class="block text-base font-black text-villa-teal" id="statPolls">0</span>
+                        <span class="text-[9px] uppercase font-bold text-slate-400">Anket</span>
+                    </div>
+                    <div class="bg-slate-50 p-2.5 rounded-2xl border border-slate-100">
+                        <span class="block text-base font-black text-villa-orange" id="statVotes">0</span>
+                        <span class="text-[9px] uppercase font-bold text-slate-400">Hlasů Celkem</span>
+                    </div>
+                </div>
+
+                <div class="pt-2 border-t border-slate-100 flex justify-between items-center">
+                    <span class="text-[11px] text-slate-500 font-bold">Obnovit počáteční data:</span>
+                    <button onclick="resetToDefaults()" class="px-3 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 text-[10px] font-black uppercase rounded-xl transition">
+                        Resetovat Data
+                    </button>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- SPODNÍ NAVIGAČNÍ LIŠTA -->
+    <nav class="fixed bottom-0 left-0 right-0 max-w-md mx-auto z-40 bg-white/95 backdrop-blur-md border-t border-pink-100 px-4 py-2 flex items-center justify-around text-slate-400 shadow-lg">
+        <button onclick="switchTab('news')" id="tab-news" class="nav-btn active text-villa-pink flex flex-col items-center space-y-0.5">
+            <i class="fa-solid fa-newspaper text-base"></i>
+            <span class="text-[9px] font-extrabold tracking-wider uppercase">Novinky</span>
+        </button>
+
+        <button onclick="switchTab('polls')" id="tab-polls" class="nav-btn flex flex-col items-center space-y-0.5">
+            <i class="fa-solid fa-square-poll-vertical text-base"></i>
+            <span class="text-[9px] font-extrabold tracking-wider uppercase">Hlasování</span>
+        </button>
+
+        <button onclick="switchTab('islanders')" id="tab-islanders" class="nav-btn flex flex-col items-center space-y-0.5">
+            <i class="fa-solid fa-heart text-base"></i>
+            <span class="text-[9px] font-extrabold tracking-wider uppercase">Srdíčka</span>
+        </button>
+
+        <button onclick="switchTab('admin')" id="tab-admin" class="nav-btn hidden text-villa-orange flex flex-col items-center space-y-0.5">
+            <i class="fa-solid fa-sliders text-base"></i>
+            <span class="text-[9px] font-extrabold tracking-wider uppercase">Režie</span>
+        </button>
+    </nav>
+
+    <!-- MODAL: ADMIN OVERLAY AUTHENTICATION -->
+    <div id="adminAuthModal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-xs p-5 rounded-3xl border border-pink-200 space-y-4 relative shadow-xl text-center">
+            <button onclick="closeModal('adminAuthModal')" class="absolute top-3 right-3 text-slate-400 hover:text-slate-600">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+            <div class="w-12 h-12 mx-auto rounded-2xl bg-pink-100 text-villa-pink flex items-center justify-center text-xl">
+                <i class="fa-solid fa-lock"></i>
+            </div>
+            <div>
+                <h3 class="text-sm font-black uppercase text-slate-800">
+                    Vstup Do Režie
+                </h3>
+                <p class="text-[11px] text-slate-500 mt-1">
+                    Zadejte administrátorské heslo režie pro přístup ke správě vily.
+                </p>
+            </div>
+
+            <form onsubmit="verifyAdminPassword(event)" class="space-y-3 text-xs">
+                <input type="password" id="adminPasswordInput" placeholder="Heslo režie..." class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-center text-slate-800 focus:outline-none focus:border-villa-pink">
+                <button type="submit" class="w-full py-2.5 bg-gradient-to-r from-villa-pink to-villa-orange font-extrabold text-white uppercase rounded-xl shadow-pink-glow">
+                    Přihlásit Se
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: DETAIL SRDÍČKA (BIO) -->
+    <div id="islanderBioModal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-sm p-5 rounded-3xl border border-pink-200 space-y-4 relative shadow-xl max-h-[90vh] overflow-y-auto">
+            <button onclick="closeModal('islanderBioModal')" class="absolute top-3 right-3 text-slate-400 hover:text-slate-600">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+            <div id="islanderBioContent"></div>
+        </div>
+    </div>
+
+    <!-- MODAL: PŘIDAT SRDÍČKO -->
+    <div id="addIslanderModal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-md p-5 rounded-3xl border border-pink-200 space-y-4 relative max-h-[90vh] overflow-y-auto shadow-xl">
+            <button onclick="closeModal('addIslanderModal')" class="absolute top-3 right-3 text-slate-400 hover:text-slate-600">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+            <h3 class="text-sm font-black uppercase text-slate-800 flex items-center gap-2">
+                <i class="fa-solid fa-user-plus text-villa-pink"></i> Přidat Nové Srdíčko
+            </h3>
+
+            <form onsubmit="handleSaveIslander(event)" class="space-y-3 text-xs">
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="block font-bold text-slate-700 mb-1">Jméno</label>
+                        <input type="text" id="formName" required placeholder="Oliver" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2 text-slate-800">
+                    </div>
+                    <div>
+                        <label class="block font-bold text-slate-700 mb-1">Věk & Povolání</label>
+                        <input type="text" id="formAgeJob" required placeholder="24, Trener" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2 text-slate-800">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="block font-bold text-slate-700 mb-1">Město</label>
+                        <input type="text" id="formCity" required placeholder="Praha" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2 text-slate-800">
+                    </div>
+                    <div>
+                        <label class="block font-bold text-slate-700 mb-1">Status</label>
+                        <select id="formStatus" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2 text-slate-800">
+                            <option value="IN_VILLA">Ve vile</option>
+                            <option value="DUMPED">Vypadl/a</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="block font-bold text-slate-700 mb-1">Typ Postavy</label>
+                        <select id="formRole" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2 text-slate-800">
+                            <option value="Srdcovka">Srdcovka (OG)</option>
+                            <option value="Bombshell">Bombshell</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block font-bold text-slate-700 mb-1">Tvoří pár s</label>
+                        <input type="text" id="formCoupled" placeholder="Single / Jméno" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2 text-slate-800">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block font-bold text-slate-700 mb-1">Motto</label>
+                    <input type="text" id="formTagline" required placeholder="Hledám 100% svůj typ..." class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2 text-slate-800">
+                </div>
+
+                <div>
+                    <label class="block font-bold text-slate-700 mb-1">Fotka (URL adresa)</label>
+                    <input type="url" id="formAvatar" placeholder="https://..." class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2 text-slate-800">
+                </div>
+
+                <button type="submit" class="w-full py-2.5 bg-gradient-to-r from-villa-pink to-villa-magenta font-extrabold text-white uppercase rounded-xl shadow-pink-glow">
+                    Uložit Srdíčko
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: VYTVOŘIT HLASOVÁNÍ -->
+    <div id="createPollModal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-md p-5 rounded-3xl border border-pink-200 space-y-4 relative shadow-xl">
+            <button onclick="closeModal('createPollModal')" class="absolute top-3 right-3 text-slate-400 hover:text-slate-600">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+            <h3 class="text-sm font-black uppercase text-slate-800 flex items-center gap-2">
+                <i class="fa-solid fa-square-plus text-villa-teal"></i> Vytvořit Nové Hlasování
+            </h3>
+
+            <form onsubmit="handleCreatePoll(event)" class="space-y-3 text-xs">
+                <div>
+                    <label class="block font-bold text-slate-700 mb-1">Otázka Hlasování</label>
+                    <input type="text" id="pollQuestion" required placeholder="Kdo má jít do Hideaway?" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-slate-800">
+                </div>
+                <div>
+                    <label class="block font-bold text-slate-700 mb-1">Možnosti (oddělené čárkou)</label>
+                    <input type="text" id="pollOptions" required placeholder="Klára & David, Rachel & Nový, Zuzana & Filip" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-slate-800">
+                </div>
+
+                <button type="submit" class="w-full py-2.5 bg-gradient-to-r from-villa-teal to-teal-600 font-extrabold text-white uppercase rounded-xl shadow-md">
+                    Publikovat Hlasování
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL: PŘIDAT ČLÁNEK -->
+    <div id="addNewsModal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-md p-5 rounded-3xl border border-pink-200 space-y-4 relative shadow-xl">
+            <button onclick="closeModal('addNewsModal')" class="absolute top-3 right-3 text-slate-400 hover:text-slate-600">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+            <h3 class="text-sm font-black uppercase text-slate-800 flex items-center gap-2">
+                <i class="fa-solid fa-newspaper text-villa-orange"></i> Publikovat Článek z Vily
+            </h3>
+
+            <form onsubmit="handleSaveNews(event)" class="space-y-3 text-xs">
+                <div>
+                    <label class="block font-bold text-slate-700 mb-1">Titulok článku</label>
+                    <input type="text" id="newsTitle" required placeholder="Emoce u ohniště gradují!" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-slate-800">
+                </div>
+                <div>
+                    <label class="block font-bold text-slate-700 mb-1">Kategorie / Tag</label>
+                    <select id="newsCategory" class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-slate-800">
+                        <option value="PRVNÍ POHLED">PRVNÍ POHLED</option>
+                        <option value="BOMBSHELL">BOMBSHELL</option>
+                        <option value="HIDEAWAY">HIDEAWAY</option>
+                        <option value="DRBY Z VILY">DRBY Z VILY</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block font-bold text-slate-700 mb-1">Text Článku</label>
+                    <textarea id="newsDesc" rows="3" required placeholder="Exkluzivní zprávy z dnešního večera ve vile..." class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-slate-800"></textarea>
+                </div>
+                <div>
+                    <label class="block font-bold text-slate-700 mb-1">Obrázek (URL)</label>
+                    <input type="url" id="newsImage" placeholder="https://..." class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 text-slate-800">
+                </div>
+
+                <button type="submit" class="w-full py-2.5 bg-gradient-to-r from-villa-orange to-amber-500 font-extrabold text-white uppercase rounded-xl shadow-md">
+                    Publikovat Článek
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- NOTIFIKAČNÍ MODAL "MÁM ZPRÁVU!" -->
+    <div id="textAlertModal" class="fixed inset-0 z-50 bg-slate-900/70 backdrop-blur-md hidden flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-xs p-6 rounded-3xl border-2 border-villa-pink text-center space-y-5 shadow-2xl">
+            <div class="w-16 h-16 mx-auto rounded-full bg-gradient-to-tr from-villa-pink via-rose-500 to-villa-yellow flex items-center justify-center text-3xl text-white shadow-pink-glow animate-bounce">
+                <i class="fa-solid fa-comment-sms"></i>
+            </div>
+            <div>
+                <span class="px-3 py-1 bg-pink-100 text-villa-pink border border-pink-200 font-black text-[10px] uppercase rounded-full">
+                    OFICIÁLNÍ NOTIFIKACE REŽIE
+                </span>
+                <h3 class="text-2xl font-black text-slate-800 font-serif mt-2 italic">
+                    "MÁM ZPRÁVU!"
+                </h3>
+            </div>
+            <p id="textAlertModalContent" class="p-3 bg-pink-50/80 rounded-2xl border border-pink-100 text-slate-700 text-xs italic leading-relaxed">
+                Ostrované, okamžitě se shromážděte u ohniště!
+            </p>
+            <button onclick="closeModal('textAlertModal')" class="w-full py-2.5 bg-gradient-to-r from-villa-pink to-villa-magenta text-white font-black text-xs uppercase tracking-wider rounded-xl shadow-pink-glow">
+                Rozumím 💬
+            </button>
+        </div>
+    </div>
+
+    <!-- FIREBASE IMPORTY PRO LIVE REÁLNÝ ČAS (FIRESTORE) -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, collection, onSnapshot, setDoc, updateDoc, deleteDoc, getDocs } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Global configuration variables
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'vila-lasky-app';
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : null;
+
+        let db = null;
+        let auth = null;
+        let currentUser = null;
+
+        function initRealtimeListeners() {
+            if (!db || !currentUser) return;
+
+            const publicPath = (col) => collection(db, 'artifacts', appId, 'public', 'data', col);
+            const publicDocPath = (col, docId) => doc(db, 'artifacts', appId, 'public', 'data', col, docId);
+
+            // Listeners for Islanders
+            onSnapshot(publicPath('islanders'), (snapshot) => {
+                if (!snapshot.empty) {
+                    const loaded = [];
+                    snapshot.forEach(d => loaded.push({ id: d.id, ...d.data() }));
+                    window.islanders = loaded;
+                    localStorage.setItem('vl_islanders', JSON.stringify(loaded));
+                } else if (window.islanders.length === 0) {
+                    window.DEFAULT_ISLANDERS.forEach(item => {
+                        setDoc(publicDocPath('islanders', item.id), item).catch(err => console.error(err));
+                    });
+                }
+                if (typeof window.renderAll === 'function') window.renderAll();
+            }, (error) => console.warn('Firestore islanders listener error:', error));
+
+            // Listeners for Polls
+            onSnapshot(publicPath('polls'), (snapshot) => {
+                if (!snapshot.empty) {
+                    const loaded = [];
+                    snapshot.forEach(d => loaded.push({ id: d.id, ...d.data() }));
+                    // Retain user's local vote selection
+                    const currentLocalPolls = JSON.parse(localStorage.getItem('vl_polls')) || [];
+                    window.polls = loaded.map(p => {
+                        const local = currentLocalPolls.find(lp => lp.id === p.id);
+                        return { ...p, userVotedOptId: local ? local.userVotedOptId : null };
+                    });
+                } else if (window.polls.length === 0) {
+                    window.DEFAULT_POLLS.forEach(item => {
+                        setDoc(publicDocPath('polls', item.id), item).catch(err => console.error(err));
+                    });
+                }
+                if (typeof window.renderAll === 'function') window.renderAll();
+            }, (error) => console.warn('Firestore polls listener error:', error));
+
+            // Listeners for News Feed
+            onSnapshot(publicPath('news'), (snapshot) => {
+                if (!snapshot.empty) {
+                    const loaded = [];
+                    snapshot.forEach(d => loaded.push({ id: d.id, ...d.data() }));
+                    window.newsFeed = loaded;
+                    localStorage.setItem('vl_news', JSON.stringify(loaded));
+                } else if (window.newsFeed.length === 0) {
+                    window.DEFAULT_NEWS.forEach(item => {
+                        setDoc(publicDocPath('news', item.id), item).catch(err => console.error(err));
+                    });
+                }
+                if (typeof window.renderAll === 'function') window.renderAll();
+            }, (error) => console.warn('Firestore news listener error:', error));
+
+            // Listener for Broadcast Messages ("Mám Zprávu!")
+            onSnapshot(publicDocPath('broadcasts', 'latest'), (docSnap) => {
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    if (data && data.timestamp > window.lastBroadcastTime) {
+                        window.lastBroadcastTime = data.timestamp;
+                        if (typeof window.triggerTextAlert === 'function') {
+                            window.triggerTextAlert(data.message, false);
+                        }
+                    }
+                }
+            }, (error) => console.warn('Firestore broadcast listener error:', error));
+
+            // Expose helper operations to window
+            window.dbStore = {
+                saveIslander: (islander) => setDoc(publicDocPath('islanders', islander.id), islander),
+                deleteIslander: (id) => deleteDoc(publicDocPath('islanders', id)),
+                savePoll: (poll) => {
+                    const cleanPoll = { ...poll };
+                    delete cleanPoll.userVotedOptId;
+                    return setDoc(publicDocPath('polls', poll.id), cleanPoll);
+                },
+                deletePoll: (id) => deleteDoc(publicDocPath('polls', id)),
+                saveNews: (news) => setDoc(publicDocPath('news', news.id), news),
+                deleteNews: (id) => deleteDoc(publicDocPath('news', id)),
+                broadcastMessage: (msg) => setDoc(publicDocPath('broadcasts', 'latest'), {
+                    message: msg,
+                    timestamp: Date.now()
+                })
+            };
+        }
+
+        if (firebaseConfig) {
+            const app = initializeApp(firebaseConfig);
+            db = getFirestore(app);
+            auth = getAuth(app);
+
+            const authTask = (typeof __initial_auth_token !== 'undefined' && __initial_auth_token)
+                ? signInWithCustomToken(auth, __initial_auth_token)
+                : signInAnonymously(auth);
+
+            authTask.then((cred) => {
+                currentUser = cred.user;
+                initRealtimeListeners();
+            }).catch(err => {
+                console.warn("Auth setup error, falling back to local mode:", err);
+                if (typeof window.loadAllData === 'function') window.loadAllData();
+                if (typeof window.renderAll === 'function') window.renderAll();
+            });
+        } else {
+            if (typeof window.loadAllData === 'function') window.loadAllData();
+            if (typeof window.renderAll === 'function') window.renderAll();
+        }
+    </script>
+
+    <!-- MODAL: UŽIVATELSKÝ PROFIL & PŘIHLÁŠENÍ -->
+    <div id="userProfileModal" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-xs p-5 rounded-3xl border border-pink-200 space-y-4 relative shadow-xl text-center">
+            <button onclick="closeModal('userProfileModal')" class="absolute top-3 right-3 text-slate-400 hover:text-slate-600">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+            <div id="authProfileView" class="space-y-4">
+                <div class="w-16 h-16 mx-auto rounded-full bg-gradient-to-tr from-villa-pink to-villa-orange p-0.5 shadow-pink-glow">
+                    <img id="userProfilePic" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80" class="w-full h-full rounded-full object-cover">
+                </div>
+                <div>
+                    <h3 id="userDisplayName" class="text-sm font-black uppercase text-slate-800">Divák Vily</h3>
+                    <p id="userEmailText" class="text-[11px] text-slate-500">Přihlášen jako Fanošek</p>
+                </div>
+
+                <div class="space-y-2 text-xs">
+                    <form onsubmit="handleCustomUserLogin(event)" class="space-y-2 text-left">
+                        <div>
+                            <label class="block font-bold text-slate-600 text-[10px] mb-1">Moje Přezdívka</label>
+                            <input type="text" id="userInputNickname" placeholder="Zadej přezdívku..." required class="w-full bg-slate-50 border border-slate-200 rounded-xl p-2 text-slate-800 text-xs">
+                        </div>
+                        <button type="submit" class="w-full py-2 bg-gradient-to-r from-villa-pink to-villa-magenta text-white font-extrabold uppercase rounded-xl shadow-pink-glow">
+                            Uložit Profil
+                        </button>
+                    </form>
+                    
+                    <div class="pt-2 border-t border-slate-100 text-[10px] text-slate-400">
+                        <p class="italic">Tvoje hlasy a preference se synchronizují s aplikací na telefonu.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT LOGIKA PRO PWA A AUTHENTIKACI -->
+    <script>
+        let deferredPrompt = null;
+        let currentUserProfile = JSON.parse(localStorage.getItem('vl_user_profile')) || {
+            nickname: 'Divák #' + Math.floor(1000 + Math.random() * 9000),
+            avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=200&q=80'
+        };
+
+        // Initialize global arrays immediately to prevent Firebase snapshot race conditions
+        window.islanders = window.islanders || [];
+        window.polls = window.polls || [];
+        window.newsFeed = window.newsFeed || [];
+
+        // Generování Manifestu přímo v kódu pro instalaci na plochu (PWA)
+        (function setupPWAManifest() {
+            const manifestData = {
+                "name": "Vila Lásky Companion App",
+                "short_name": "Vila Lásky",
+                "start_url": "./",
+                "display": "standalone",
+                "background_color": "#ffffff",
+                "theme_color": "#ff007a",
+                "icons": [
+                    {
+                        "src": "https://placehold.co/192x192/ff007a/ffffff?text=VILA",
+                        "sizes": "192x192",
+                        "type": "image/png"
+                    },
+                    {
+                        "src": "https://placehold.co/512x512/ff007a/ffffff?text=VILA",
+                        "sizes": "512x512",
+                        "type": "image/png"
+                    }
+                ]
+            };
+            const stringManifest = JSON.stringify(manifestData);
+            const blob = new Blob([stringManifest], {type: 'application/json'});
+            const manifestURL = URL.createObjectURL(blob);
+            document.getElementById('manifestPlaceholder').setAttribute('href', manifestURL);
+        })();
+
+        // Zachycení instalační nabídky PWA prohlížečem
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            document.getElementById('pwaInstallBtn').classList.remove('hidden');
+            document.getElementById('pwaBanner').classList.remove('hidden');
+        });
+
+        function installPWAApp() {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then((choiceResult) => {
+                    if (choiceResult.outcome === 'accepted') {
+                        document.getElementById('pwaInstallBtn').classList.add('hidden');
+                        document.getElementById('pwaBanner').classList.add('hidden');
+                    }
+                    deferredPrompt = null;
+                });
+            } else {
+                alert('Pro instalaci na iOS: Klikněte na tlačítko Sdílet v Safari a zvolte "Přidat na plochu". Na Androidu zvolte v menu prohlížeče "Instalovat aplikaci".');
+            }
+        }
+
+        function updateProfileUI() {
+            document.getElementById('userDisplayName').innerText = currentUserProfile.nickname;
+            document.getElementById('userInputNickname').value = currentUserProfile.nickname;
+            document.getElementById('userProfilePic').src = currentUserProfile.avatar;
+            document.getElementById('userAvatarBtn').innerHTML = `<img src="${currentUserProfile.avatar}" class="w-full h-full object-cover">`;
+        }
+
+        function handleCustomUserLogin(e) {
+            e.preventDefault();
+            const nick = document.getElementById('userInputNickname').value.trim();
+            if (nick) {
+                currentUserProfile.nickname = nick;
+                localStorage.setItem('vl_user_profile', JSON.stringify(currentUserProfile));
+                updateProfileUI();
+                closeModal('userProfileModal');
+            }
+        }
+    </script>
+
+    <!-- JAVASCRIPT LOGIKA -->
+    <script>
+        // Výchozí Data pro aplikaci Vila Lásky
+        window.DEFAULT_ISLANDERS = [
+            {
+                id: 'isl-1',
+                name: 'Klára',
+                ageJob: '23 let, Modelka',
+                city: 'Praha',
+                status: 'IN_VILLA',
+                role: 'Srdcovka',
+                coupledWith: 'David',
+                tagline: 'Do vily jsem si přišla pro opravdovou lásku a věrnost!',
+                redFlags: 'Odpovídá na zprávy až po 5 hodinách.',
+                islandHearts: 1420,
+                avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80'
+            },
+            {
+                id: 'isl-2',
+                name: 'David',
+                ageJob: '25 let, Fitness Trenér',
+                city: 'Brno',
+                status: 'IN_VILLA',
+                role: 'Srdcovka',
+                coupledWith: 'Klára',
+                tagline: 'Moje ideální holka musí mít smysl pro humor a úsměv.',
+                redFlags: 'Stráví moc času před zrcadlem.',
+                islandHearts: 1210,
+                avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&q=80'
+            },
+            {
+                id: 'isl-3',
+                name: 'Rachel',
+                ageJob: '24 let, Content Creator',
+                city: 'Bratislava',
+                status: 'IN_VILLA',
+                role: 'Bombshell',
+                coupledWith: 'Single',
+                tagline: 'Když vidím někoho, kdo se mi líbí, jdu si za tím!',
+                redFlags: 'Flirtuje se všemi současně.',
+                islandHearts: 980,
+                avatar: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=400&q=80'
+            },
+            {
+                id: 'isl-4',
+                name: 'Oliver',
+                ageJob: '26 let, Podnikatel',
+                city: 'Ostrava',
+                status: 'DUMPED',
+                role: 'Srdcovka',
+                coupledWith: 'Vypadl',
+                tagline: 'Vila mi sice nepřála, ale věřím na osud.',
+                redFlags: 'Rychle podléhá emocím.',
+                islandHearts: 540,
+                avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=400&q=80'
+            }
+        ];
+
+        window.DEFAULT_POLLS = [
+            {
+                id: 'poll-1',
+                question: 'Který pár si zaslouží jít dnes večer do romantického Hideaway?',
+                isOpen: true,
+                options: [
+                    { id: 'opt-10', label: 'Klára & David', votes: 1840 },
+                    { id: 'opt-20', label: 'Rachel & Nový Bombshell', votes: 620 }
+                ],
+                userVotedOptId: null
+            },
+            {
+                id: 'poll-2',
+                question: 'Kdo z ostrovanů vnáší do vily nejvíce energie?',
+                isOpen: true,
+                options: [
+                    { id: 'opt-a', label: 'Rachel', votes: 1250 },
+                    { id: 'opt-b', label: 'David', votes: 890 },
+                    { id: 'opt-c', label: 'Klára', votes: 410 }
+                ],
+                userVotedOptId: null
+            }
+        ];
+
+        window.DEFAULT_NEWS = [
+            {
+                id: 'news-1',
+                title: 'První Pohled: Dramatické párování u ohniště se blíží!',
+                category: 'PRVNÍ POHLED',
+                desc: 'Všichni ostrované dostali nečekanou výzvu. Kdo zůstane bez páru a bude muset bojovat o setrvání ve vile?',
+                time: 'Dnes 18:30',
+                image: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=600&q=80'
+            },
+            {
+                id: 'news-2',
+                title: 'Příchod nového pokušení: Do vily míří nová Bombshell!',
+                category: 'BOMBSHELL',
+                desc: 'Atmosféra ve vile opět hustne. Nová příchozí už dala jasně najevo, na koga z obsazení si brousí zuby.',
+                time: 'Před 2 hodinami',
+                image: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=600&q=80'
+            }
+        ];
+
+        const DEFAULT_ISLANDERS = window.DEFAULT_ISLANDERS;
+        const DEFAULT_POLLS = window.DEFAULT_POLLS;
+        const DEFAULT_NEWS = window.DEFAULT_NEWS;
+
+        // Stav Aplikace
+        let islanders = window.islanders;
+        let polls = window.polls;
+        let newsFeed = window.newsFeed;
+        let isAdminMode = false;
+        let activeFilter = 'ALL';
+        let isMuted = false;
+        let lastBroadcastTime = Date.now();
+
+        function loadAllData() {
+            window.islanders = islanders = JSON.parse(localStorage.getItem('vl_islanders')) || [...DEFAULT_ISLANDERS];
+            window.polls = polls = JSON.parse(localStorage.getItem('vl_polls')) || [...DEFAULT_POLLS];
+            window.newsFeed = newsFeed = JSON.parse(localStorage.getItem('vl_news')) || [...DEFAULT_NEWS];
+        }
+
+        // Initialize state right away
+        loadAllData();
+
+        window.onload = function() {
+            loadAllData();
+            updateProfileUI();
+            renderAll();
+        };
+
+        function saveAllData() {
+            localStorage.setItem('vl_islanders', JSON.stringify(islanders));
+            localStorage.setItem('vl_polls', JSON.stringify(polls));
+            localStorage.setItem('vl_news', JSON.stringify(newsFeed));
+        }
+
+        function resetToDefaults() {
+            if (confirm('Opravdu chceš obnovit všechna výchozí data Vily Lásky?')) {
+                localStorage.removeItem('vl_islanders');
+                localStorage.removeItem('vl_polls');
+                localStorage.removeItem('vl_news');
+                loadAllData();
+                renderAll();
+            }
+        }
+
+        // Navigace
+        function switchTab(tabName) {
+            document.querySelectorAll('.page-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('text-villa-pink'));
+
+            document.getElementById(`page-${tabName}`).classList.remove('hidden');
+            document.getElementById(`tab-${tabName}`).classList.add('text-villa-pink');
+        }
+
+        // Režie / Admin Přepínač
+        function handleAdminToggle(checked) {
+            if (checked && !isAdminMode) {
+                document.getElementById('adminToggle').checked = false;
+                openModal('adminAuthModal');
+            } else if (!checked) {
+                isAdminMode = false;
+                toggleAdminUI(false);
+            }
+        }
+
+        function verifyAdminPassword(e) {
+            e.preventDefault();
+            const pass = document.getElementById('adminPasswordInput').value.trim();
+            if (pass === 'mišena') {
+                isAdminMode = true;
+                document.getElementById('adminToggle').checked = true;
+                closeModal('adminAuthModal');
+                toggleAdminUI(true);
+                document.getElementById('adminPasswordInput').value = '';
+            } else {
+                alert('Nesprávné heslo!');
+            }
+        }
+
+        function toggleAdminUI(enabled) {
+            document.getElementById('adminModeBanner').classList.toggle('hidden', !enabled);
+            document.getElementById('tab-admin').classList.toggle('hidden', !enabled);
+            renderAll();
+        }
+
+        // Web Audio API Zvukové Efekty
+        function playTextSound() {
+            if (isMuted) return;
+            try {
+                const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                if (!AudioCtx) return;
+                const ctx = new AudioCtx();
+
+                const notes = [659.25, 880, 1318.51]; // E5, A5, E6
+                notes.forEach((freq, i) => {
+                    setTimeout(() => {
+                        const osc = ctx.createOscillator();
+                        const gain = ctx.createGain();
+                        osc.type = 'sine';
+                        osc.frequency.setValueAtTime(freq, ctx.currentTime);
+                        gain.gain.setValueAtTime(0.15, ctx.currentTime);
+                        gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.3);
+                        osc.connect(gain);
+                        gain.connect(ctx.destination);
+                        osc.start();
+                        osc.stop(ctx.currentTime + 0.3);
+                    }, i * 110);
+                });
+            } catch (e) {}
+        }
+
+        function playTone(freq, duration) {
+            if (isMuted) return;
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = 'sine';
+                osc.frequency.value = freq;
+                gain.gain.setValueAtTime(0.08, ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + duration);
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.start();
+                osc.stop(ctx.currentTime + duration);
+            } catch(e){}
+        }
+
+        function toggleAudioMute() {
+            isMuted = !isMuted;
+            document.getElementById('audioToggleBtn').innerHTML = isMuted 
+                ? '<i class="fa-solid fa-volume-xmark text-rose-500"></i>' 
+                : '<i class="fa-solid fa-volume-high"></i>';
+        }
+
+        function spawnHeartAnimation(xPercent) {
+            const container = document.getElementById('heartAnimationContainer');
+            const el = document.createElement('div');
+            el.innerHTML = '<i class="fa-solid fa-heart text-villa-pink text-2xl"></i>';
+            el.className = 'absolute animate-float-heart pointer-events-none drop-shadow-md';
+            el.style.left = (xPercent || (30 + Math.random() * 40)) + '%';
+            el.style.bottom = '80px';
+            container.appendChild(el);
+
+            setTimeout(() => el.remove(), 1500);
+        }
+
+        function triggerTextAlert(customMsg = null, shouldBroadcast = true) {
+            playTextSound();
+            const alertText = customMsg || "OSTROVANÉ! Okamžitě se shromážděte u ohniště!";
+            document.getElementById('textAlertModalContent').innerText = alertText;
+            openModal('textAlertModal');
+
+            if (shouldBroadcast && window.dbStore) {
+                window.dbStore.broadcastMessage(alertText);
+            }
+        }
+
+        // RENDER VŠECH SEKCÍ
+        function renderAll() {
+            renderNewsFeed();
+            renderPolls();
+            renderHomePollPreview();
+            renderIslanders();
+            renderHomeIslandersRow();
+            updateAdminStats();
+        }
+
+        // 1. Novinky & Články
+        function renderNewsFeed() {
+            const container = document.getElementById('articlesList');
+            document.getElementById('articleCountLabel').innerText = `${newsFeed.length} článků`;
+
+            if (newsFeed.length === 0) {
+                container.innerHTML = `<div class="villa-card-style p-6 text-center text-xs text-slate-400 rounded-3xl">Žádné články k zobrazení.</div>`;
+                return;
+            }
+
+            container.innerHTML = newsFeed.map(item => `
+                <div class="villa-card-style rounded-3xl overflow-hidden relative space-y-2">
+                    <div class="h-44 relative bg-slate-100">
+                        <img src="${item.image}" alt="${item.title}" class="w-full h-full object-cover">
+                        <span class="absolute top-3 left-3 px-2.5 py-1 rounded-full bg-villa-pink text-[9px] font-black uppercase text-white tracking-wider shadow-sm">
+                            ${item.category}
+                        </span>
+                        <span class="absolute bottom-3 right-3 px-2.5 py-1 rounded-full bg-white/90 backdrop-blur-sm text-[9px] font-bold text-slate-700 shadow-sm">
+                            ${item.time}
+                        </span>
+                    </div>
+                    <div class="p-4 space-y-1.5">
+                        <h3 class="text-xs font-black text-slate-800 leading-snug">${item.title}</h3>
+                        <p class="text-[11px] text-slate-600 leading-relaxed">${item.desc}</p>
+                        ${isAdminMode ? `
+                            <div class="pt-2 flex justify-end">
+                                <button onclick="deleteNews('${item.id}')" class="text-[10px] text-rose-600 bg-rose-50 hover:bg-rose-100 px-2.5 py-1 rounded-xl border border-rose-200 font-bold transition">
+                                    <i class="fa-solid fa-trash mr-1"></i> Odstranit Článek
+                                </button>
+                            </div>
+                        ` : ''}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // 2. Oficiální Hlasování
+        function renderPolls() {
+            const container = document.getElementById('viewerPollsContainer');
+            if (polls.length === 0) {
+                container.innerHTML = `<div class="villa-card-style p-6 text-center text-xs text-slate-400 rounded-3xl">Momentálně neprobíhá žádné hlasování.</div>`;
+                return;
+            }
+
+            container.innerHTML = polls.map(poll => {
+                const totalVotes = poll.options.reduce((s, o) => s + o.votes, 0);
+                const hasVoted = poll.userVotedOptId !== null;
+
+                return `
+                    <div class="villa-card-style p-4 rounded-3xl space-y-3 relative border border-pink-100">
+                        <div class="flex items-center justify-between text-[10px] font-bold">
+                            <span class="text-villa-pink uppercase tracking-widest flex items-center gap-1">
+                                <i class="fa-solid fa-circle-dot text-emerald-500 animate-pulse"></i> ${poll.isOpen ? 'Aktivní Hlasování' : 'Uzavřeno'}
+                            </span>
+                            <!-- Počet hlasů se zobrazuje pouze správci v Režii -->
+                            ${isAdminMode ? `<span class="text-slate-500 font-extrabold bg-slate-100 px-2 py-0.5 rounded-full">Celkem: ${totalVotes.toLocaleString('cs-CZ')} Hlasů</span>` : ''}
+                        </div>
+
+                        <h3 class="text-xs font-black text-slate-800 leading-snug">${poll.question}</h3>
+
+                        <div class="space-y-2 pt-1">
+                            ${poll.options.map(opt => {
+                                const pct = totalVotes > 0 ? Math.round((opt.votes / totalVotes) * 100) : 0;
+                                const isSelected = poll.userVotedOptId === opt.id;
+
+                                return `
+                                    <div class="space-y-1">
+                                        <button onclick="castVote('${poll.id}', '${opt.id}')" ${hasVoted || !poll.isOpen ? 'disabled' : ''} class="w-full text-left p-3 rounded-2xl flex items-center justify-between text-xs font-bold transition ${isSelected ? 'bg-villa-pink text-white shadow-pink-glow' : 'bg-slate-50 text-slate-700 border border-slate-200 hover:border-villa-pink/50'}">
+                                            <span>${opt.label}</span>
+                                            ${hasVoted ? `
+                                                <span class="text-xs font-extrabold">
+                                                    ${isAdminMode ? `${pct}% (${opt.votes} hlasů)` : `<i class="fa-solid fa-check text-emerald-400"></i> Odhlasováno`}
+                                                </span>
+                                            ` : `<i class="fa-solid fa-chevron-right text-villa-pink"></i>`}
+                                        </button>
+
+                                        <!-- Graf výsledků vidí POUZE Administrátor v Režii -->
+                                        ${isAdminMode ? `
+                                            <div class="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
+                                                <div class="h-full bg-gradient-to-r from-villa-pink to-villa-teal transition-all duration-500" style="width: ${pct}%"></div>
+                                            </div>
+                                        ` : ''}
+                                    </div>
+                                `;
+                            }).join('')}
+                        </div>
+
+                        ${isAdminMode ? `
+                            <div class="pt-2 border-t border-slate-100 flex items-center justify-between">
+                                <button onclick="togglePollStatus('${poll.id}')" class="text-[10px] text-slate-600 bg-slate-100 px-2.5 py-1 rounded-xl font-bold">
+                                    ${poll.isOpen ? 'Uzavřít Hlasování' : 'Otevřít Hlasování'}
+                                </button>
+                                <button onclick="deletePoll('${poll.id}')" class="text-[10px] text-rose-600 bg-rose-50 px-2.5 py-1 rounded-xl font-bold">
+                                    <i class="fa-solid fa-trash mr-1"></i> Odstranit Hlasování
+                                </button>
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function renderHomePollPreview() {
+            const container = document.getElementById('homeActivePollPreview');
+            if (polls.length === 0) return;
+            const topPoll = polls[0];
+
+            container.innerHTML = `
+                <div class="bg-gradient-to-r from-pink-50 to-orange-50 p-4 rounded-3xl border border-pink-200 space-y-2">
+                    <div class="flex items-center justify-between text-[10px]">
+                        <span class="font-black text-villa-pink uppercase tracking-wider flex items-center gap-1">
+                            <i class="fa-solid fa-fire text-villa-orange"></i> Aktuální Otázka
+                        </span>
+                        <button onclick="switchTab('polls')" class="text-villa-teal font-extrabold">Přejít k Hlasování &rarr;</button>
+                    </div>
+                    <h3 class="text-xs font-black text-slate-800">${topPoll.question}</h3>
+                    <button onclick="switchTab('polls')" class="w-full py-2 bg-gradient-to-r from-villa-pink to-villa-orange text-white font-extrabold text-xs uppercase rounded-xl shadow-pink-glow">
+                        Hlasovat Nyní &rarr;
+                    </button>
+                </div>
+            `;
+        }
+
+        // HORIZONTÁLNÍ SEZNAM VŠECH SRDÍČEK NA HLAVNÍ STRÁNCE (NOVINKY)
+        function renderHomeIslandersRow() {
+            const container = document.getElementById('homeIslandersRow');
+
+            if (islanders.length === 0) {
+                container.innerHTML = `<span class="text-xs text-slate-400 p-2">Momentálně nejsou zadaná žádná srdíčka.</span>`;
+                return;
+            }
+
+            container.innerHTML = islanders.map(item => {
+                const isDumped = item.status === 'DUMPED';
+
+                return `
+                    <div onclick="openIslanderBio('${item.id}')" class="flex-shrink-0 w-20 flex flex-col items-center group cursor-pointer space-y-1">
+                        <div class="w-16 h-16 rounded-full p-0.5 ${isDumped ? 'bg-slate-300' : 'bg-gradient-to-tr from-villa-pink via-villa-orange to-villa-yellow shadow-sm'} group-hover:scale-105 transition-transform relative">
+                            <img src="${item.avatar}" alt="${item.name}" class="w-full h-full rounded-full object-cover border-2 border-white ${isDumped ? 'grayscale opacity-60' : ''}">
+                            ${isDumped ? `
+                                <span class="absolute -bottom-1 left-1/2 -translate-x-1/2 bg-slate-800 text-white text-[7px] font-black px-1.5 py-0.2 rounded-full uppercase tracking-tighter whitespace-nowrap shadow">
+                                    Vypadl/a
+                                </span>
+                            ` : ''}
+                        </div>
+                        <span class="text-[11px] font-black text-slate-800 leading-tight truncate w-full text-center mt-1">${item.name}</span>
+                        <span class="text-[8px] font-bold ${isDumped ? 'text-slate-400' : 'text-villa-pink'} truncate w-full text-center">
+                            ${isDumped ? 'Mimo vilu' : item.role}
+                        </span>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // 3. Srdíčka (Filtrovaná Mřížka)
+        function filterIslanders(filter) {
+            activeFilter = filter;
+            document.querySelectorAll('.islander-filter-btn').forEach(b => {
+                b.classList.remove('bg-villa-pink', 'text-white', 'shadow-sm');
+                b.classList.add('bg-slate-100', 'text-slate-600');
+            });
+            document.getElementById(`filter-${filter}`).classList.add('bg-villa-pink', 'text-white', 'shadow-sm');
+            renderIslanders();
+        }
+
+        function renderIslanders() {
+            const grid = document.getElementById('islanderRosterGrid');
+            const filtered = islanders.filter(i => {
+                if (activeFilter === 'ALL') return true;
+                if (activeFilter === 'IN_VILLA') return i.status === 'IN_VILLA';
+                if (activeFilter === 'DUMPED') return i.status === 'DUMPED';
+                if (activeFilter === 'COUPLES') return i.status === 'IN_VILLA' && i.coupledWith && i.coupledWith !== 'Single';
+                if (activeFilter === 'Bombshell') return i.role === 'Bombshell';
+                return true;
+            });
+
+            grid.innerHTML = filtered.map(item => {
+                const isDumped = item.status === 'DUMPED';
+
+                return `
+                    <div onclick="openIslanderBio('${item.id}')" class="villa-card-style rounded-2xl overflow-hidden relative group cursor-pointer border border-slate-200 transition hover:border-villa-pink/50">
+                        <div class="h-40 relative bg-slate-100">
+                            <img src="${item.avatar}" alt="${item.name}" class="w-full h-full object-cover ${isDumped ? 'grayscale opacity-60' : ''}">
+                            <div class="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-transparent to-transparent"></div>
+                            
+                            <span class="absolute top-2 left-2 text-[8px] font-black uppercase px-2 py-0.5 rounded-full ${isDumped ? 'bg-slate-700 text-white' : 'bg-villa-pink text-white shadow-sm'}">
+                                ${isDumped ? 'VYPADL/A' : item.role}
+                            </span>
+
+                            <div class="absolute bottom-2 left-2 right-2 text-white">
+                                <h4 class="font-black text-xs leading-tight">${item.name}</h4>
+                                <p class="text-[9px] opacity-90">${item.ageJob}</p>
+                            </div>
+                        </div>
+
+                        <div class="p-2.5 bg-white flex items-center justify-between text-[10px]">
+                            <span class="text-slate-500 font-medium truncate"><i class="fa-solid fa-heart text-villa-pink mr-1"></i> ${item.coupledWith}</span>
+                            <span class="text-villa-teal font-extrabold flex items-center gap-1">
+                                <i class="fa-solid fa-location-dot"></i> ${item.city}
+                            </span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function openIslanderBio(id) {
+            const item = islanders.find(i => i.id === id);
+            if (!item) return;
+
+            document.getElementById('islanderBioContent').innerHTML = `
+                <div class="text-center space-y-3">
+                    <img src="${item.avatar}" class="w-28 h-28 rounded-full object-cover border-4 border-villa-pink mx-auto shadow-pink-glow">
+                    <div>
+                        <h3 class="text-xl font-black text-slate-800">${item.name}</h3>
+                        <p class="text-xs text-villa-teal font-extrabold">${item.ageJob} • ${item.city}</p>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-2 text-xs py-2 bg-slate-50 rounded-2xl border border-slate-200">
+                        <div>
+                            <span class="block text-[10px] text-slate-400 font-bold uppercase">Status</span>
+                            <span class="font-black ${item.status === 'DUMPED' ? 'text-rose-500' : 'text-emerald-600'}">${item.status === 'DUMPED' ? 'Vypadl/a' : 'Ve Vile'}</span>
+                        </div>
+                        <div>
+                            <span class="block text-[10px] text-slate-400 font-bold uppercase">Pár</span>
+                            <span class="font-black text-villa-pink">${item.coupledWith}</span>
+                        </div>
+                    </div>
+
+                    <div class="text-left space-y-2 text-xs">
+                        <div class="p-3 bg-slate-50 rounded-xl border border-slate-200">
+                            <span class="font-extrabold text-slate-700 block mb-0.5">Motto:</span>
+                            <p class="text-slate-600 italic">"${item.tagline}"</p>
+                        </div>
+                        <div class="p-3 bg-slate-50 rounded-xl border border-slate-200">
+                            <span class="font-extrabold text-rose-500 block mb-0.5">Red Flag:</span>
+                            <p class="text-slate-600">${item.redFlags || 'Žádné'}</p>
+                        </div>
+                    </div>
+
+                    ${isAdminMode ? `
+                        <div class="pt-3 border-t border-slate-200 flex gap-2">
+                            <button onclick="toggleDumpStatus('${item.id}')" class="flex-1 py-2 bg-slate-100 text-slate-700 text-xs font-bold rounded-xl border border-slate-200">
+                                ${item.status === 'DUMPED' ? 'Vrátit do Vily' : 'Vyřadit z Vily'}
+                            </button>
+                            <button onclick="deleteIslander('${item.id}')" class="py-2 px-3 bg-rose-50 text-rose-600 text-xs font-bold rounded-xl border border-rose-200">
+                                <i class="fa-solid fa-trash"></i>
+                            </button>
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+
+            openModal('islanderBioModal');
+        }
+
+        function toggleDumpStatus(id) {
+            const item = islanders.find(i => i.id === id);
+            if (!item) return;
+            item.status = item.status === 'IN_VILLA' ? 'DUMPED' : 'IN_VILLA';
+            if (item.status === 'DUMPED') item.coupledWith = 'Vypadl/a';
+            
+            saveAllData();
+            if (window.dbStore) window.dbStore.saveIslander(item);
+            
+            closeModal('islanderBioModal');
+            triggerTextAlert(`OZNÁMENÍ: ${item.name} opouští Vilu Lásky!`);
+        }
+
+        function deleteIslander(id) {
+            islanders = islanders.filter(i => i.id !== id);
+            saveAllData();
+            if (window.dbStore) window.dbStore.deleteIslander(id);
+            closeModal('islanderBioModal');
+        }
+
+        function castVote(pollId, optId) {
+            const poll = polls.find(p => p.id === pollId);
+            if (!poll || !poll.isOpen || poll.userVotedOptId) return;
+
+            const option = poll.options.find(o => o.id === optId);
+            if (option) {
+                option.votes += 1;
+                poll.userVotedOptId = optId;
+                saveAllData();
+                if (window.dbStore) window.dbStore.savePoll(poll);
+                spawnHeartAnimation(50);
+                playTone(523.25, 0.2); // C5 sound feedback
+            }
+        }
+
+        function togglePollStatus(pollId) {
+            const poll = polls.find(p => p.id === pollId);
+            if (poll) {
+                poll.isOpen = !poll.isOpen;
+                saveAllData();
+                if (window.dbStore) window.dbStore.savePoll(poll);
+            }
+        }
+
+        // ADMIN / REŽIE ACTIONS
+        function handleCreatePoll(e) {
+            e.preventDefault();
+            const question = document.getElementById('pollQuestion').value.trim();
+            const rawOpts = document.getElementById('pollOptions').value.split(',').map(s => s.trim()).filter(Boolean);
+
+            if (rawOpts.length < 2) {
+                alert('Zadej alespoň 2 možnosti oddělené čárkou');
+                return;
+            }
+
+            const newPoll = {
+                id: 'poll-' + Date.now(),
+                question,
+                isOpen: true,
+                options: rawOpts.map((lbl, idx) => ({ id: `opt-${idx}-${Date.now()}`, label: lbl, votes: 0 })),
+                userVotedOptId: null
+            };
+
+            polls.unshift(newPoll);
+            saveAllData();
+            if (window.dbStore) window.dbStore.savePoll(newPoll);
+
+            closeModal('createPollModal');
+            triggerTextAlert(`VYHLÁŠENO NOVÉ HLASOVÁNÍ: "${question}"`);
+        }
+
+        function handleSaveIslander(e) {
+            e.preventDefault();
+            const name = document.getElementById('formName').value.trim();
+            const ageJob = document.getElementById('formAgeJob').value.trim();
+            const city = document.getElementById('formCity').value.trim() || 'Praha';
+            const status = document.getElementById('formStatus').value;
+            const role = document.getElementById('formRole').value;
+            const coupledWith = document.getElementById('formCoupled').value.trim() || 'Single';
+            const tagline = document.getElementById('formTagline').value.trim();
+            const avatar = document.getElementById('formAvatar').value.trim() || `https://placehold.co/300x300/ff007a/ffffff?text=${encodeURIComponent(name)}`;
+
+            const newIslander = {
+                id: 'isl-' + Date.now(),
+                name,
+                ageJob,
+                city,
+                status,
+                role,
+                coupledWith,
+                tagline,
+                avatar
+            };
+
+            islanders.unshift(newIslander);
+            saveAllData();
+            if (window.dbStore) window.dbStore.saveIslander(newIslander);
+
+            closeModal('addIslanderModal');
+            triggerTextAlert(`BOMBSHELL ALERT! Do vily vstupuje ${name}!`);
+        }
+
+        function handleSaveNews(e) {
+            e.preventDefault();
+            const title = document.getElementById('newsTitle').value.trim();
+            const category = document.getElementById('newsCategory').value;
+            const desc = document.getElementById('newsDesc').value.trim();
+            const image = document.getElementById('newsImage').value.trim() || 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=600&q=80';
+
+            const newNews = {
+                id: 'news-' + Date.now(),
+                title,
+                category,
+                desc,
+                time: 'Právě teď',
+                image
+            };
+
+            newsFeed.unshift(newNews);
+            saveAllData();
+            if (window.dbStore) window.dbStore.saveNews(newNews);
+
+            closeModal('addNewsModal');
+        }
+
+        function deletePoll(pollId) {
+            polls = polls.filter(p => p.id !== pollId);
+            saveAllData();
+            if (window.dbStore) window.dbStore.deletePoll(pollId);
+        }
+
+        function deleteNews(newsId) {
+            newsFeed = newsFeed.filter(n => n.id !== newsId);
+            saveAllData();
+            if (window.dbStore) window.dbStore.deleteNews(newsId);
+        }
+
+        function handleSendCustomAlert(e) {
+            e.preventDefault();
+            const input = document.getElementById('customAlertInput');
+            if (!input.value.trim()) return;
+            triggerTextAlert(input.value.trim(), true);
+            input.value = '';
+        }
+
+        function updateAdminStats() {
+            document.getElementById('statIslanders').innerText = islanders.length;
+            document.getElementById('statPolls').innerText = polls.length;
+            const totalVotes = polls.reduce((sum, p) => sum + p.options.reduce((s, o) => s + o.votes, 0), 0);
+            document.getElementById('statVotes').innerText = totalVotes.toLocaleString('cs-CZ');
+        }
+
+        function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
+        function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+    </script>
+</body>
+</html>
